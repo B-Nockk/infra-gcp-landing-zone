@@ -1,0 +1,54 @@
+IGNORE
+*.ignore*
+
+# ==============================================================================
+# Terraform / OpenTofu Internal Cache & Binaries
+# ==============================================================================
+# Local directory created by 'init'. Contains provider plugins and backend settings.
+.terraform/
+.opentofu/
+
+# System-specific lock files generated during provider upgrades
+.terraform.lock.hcl
+
+# ==============================================================================
+# Execution Plans and State Artifacts
+# ==============================================================================
+# Main execution plans generated via 'terraform plan -out=tfplan' (or your Makefile)
+*tfplan*
+
+# Local state files used during 'local' testing.
+# WARNING: These contain plain-text passwords, tokens, and secrets!
+*.tfstate
+*.tfstate.*
+
+# Crash log dumps generated if a provider or binary panics
+logs
+*.log
+crash.log
+crash.*.log
+
+# ==============================================================================
+# Variables and Secrets (Environment Specifics)
+# ==============================================================================
+# Ignore all variable value files. These hold your live subscription and tenant IDs.
+*.tfvars
+*.tfvars.json
+
+# Override files used for quick, non-committed local testing changes
+*override.tf
+*override.tf.json
+_override.tf
+_override.tf.json
+
+# ==============================================================================
+# Generated/Combined Documentation & Context Logs
+# ==============================================================================
+# Ignores the combined file we generated earlier for code aggregation
+combined_code.txt
+
+# ==============================================================================
+# IDE and System Metadata (Optional but recommended)
+# ==============================================================================
+.DS_Store
+Thumbs.db
