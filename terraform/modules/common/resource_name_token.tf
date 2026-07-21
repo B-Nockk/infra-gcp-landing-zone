@@ -15,7 +15,7 @@ locals {
     folder  = "fldr"
 
     # --- Networking ---
-    vpc_network         = "vpc"
+    vpc                 = "vpc"
     subnet              = "snet"
     firewall_rule       = "fw"
     route               = "rt"
