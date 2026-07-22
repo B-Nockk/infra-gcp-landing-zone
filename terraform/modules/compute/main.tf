@@ -76,7 +76,7 @@ resource "google_compute_region_instance_group_manager" "this" {
     instance_template = google_compute_instance_template.this[each.key].id
   }
 
-  target_size = 2
+  target_size = each.value.fleet_size
   # Was hardcoded "vm-${each.key}" — now common's naming catalogue owns this too.
   base_instance_name = var.resource_computed_names.workloads[each.key].instance_prefix
 
@@ -86,9 +86,18 @@ resource "google_compute_region_instance_group_manager" "this" {
   }
 
   update_policy {
-    type                  = "PROACTIVE"
-    minimal_action        = "REPLACE"
-    max_surge_fixed       = 1
-    max_unavailable_fixed = 0
+    type           = var.update_profiles[each.value.update_profile].type
+    minimal_action = var.update_profiles[each.value.update_profile].minimal_action
+
+    # THE DYNAMIC SWITCH:
+    # If the profile uses 'fixed', these resolve to numbers.
+    # If the profile uses 'percent', try() returns null, and GCP ignores them.
+    max_surge_fixed       = try(var.update_profiles[each.value.update_profile].max_surge_fixed, null)
+    max_unavailable_fixed = try(var.update_profiles[each.value.update_profile].max_unavailable_fixed, null)
+
+    # If the profile uses 'percent', these resolve to numbers.
+    # If the profile uses 'fixed', try() returns null, and GCP ignores them.
+    max_surge_percent       = try(var.update_profiles[each.value.update_profile].max_surge_percent, null)
+    max_unavailable_percent = try(var.update_profiles[each.value.update_profile].max_unavailable_percent, null)
   }
 }

@@ -1,5 +1,16 @@
 IGNORE
 *.ignore*
+# ==============================================================================
+# Platform Tooling & Secrets
+# ==============================================================================
+# Custom auth scripts (contains local credential paths or tokens)
+platform_tooling/scripts/custom-auth.sh
+
+# Any local secrets directory (best practice for JSON keys)
+platform_tooling/secrets/
+
+# Dynamically generated backend configs (bootstrap-state.sh creates these)
+platform_tooling/config/backend-*.hcl
 
 # ==============================================================================
 # Terraform / OpenTofu Internal Cache & Binaries

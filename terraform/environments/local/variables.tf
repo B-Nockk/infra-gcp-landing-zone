@@ -111,6 +111,7 @@ variable "workloads" {
     # optional() so a future identity-only workload (no VM) doesn't need a compute block.
     compute = optional(object({
       machine_type       = string
+      fleet_size         = number # We still need this for GCP math
       vpc_key            = string # logical key into var.vpcs (e.g. "primary")
       subnet_key         = string # logical key into that VPC's subnets (e.g. "private_subnet")
       network_tags       = list(string)
@@ -127,6 +128,46 @@ variable "workloads" {
         request_path = string
         protocol     = string
       })
+
+      # Reference to the update_profiles map key
+      update_profile = optional(string, "standard")
     }))
   }))
+}
+
+# ============================== ==============================
+# COMPUTE PROFILES (Reusable update strategies)
+# ============================== ==============================
+variable "update_profiles" {
+  description = "Library of reusable update policy profiles. Supports both 'fixed' (for small fleets) and 'percent' (for large fleets) strategies."
+  type = map(object({
+    minimal_action = string
+    type           = string # PROACTIVE or OPPORTUNISTIC
+
+    # Fixed strategy (Required for fleets < 10 instances)
+    max_surge_fixed       = optional(number)
+    max_unavailable_fixed = optional(number)
+
+    # Percent strategy (Required for fleets >= 10 instances)
+    max_surge_percent       = optional(number)
+    max_unavailable_percent = optional(number)
+  }))
+
+  # default = {
+  #   # Strategy for small/dev fleets (Uses Fixed)
+  #   standard = {
+  #     minimal_action        = "REPLACE"
+  #     type                  = "PROACTIVE"
+  #     max_surge_fixed       = 3 # Must be >= number of zones (3)
+  #     max_unavailable_fixed = 0 # Zero downtime
+  #   }
+
+  #   # Strategy for large/prod fleets (Uses Percent)
+  #   canary = {
+  #     minimal_action          = "REPLACE"
+  #     type                    = "PROACTIVE"
+  #     max_surge_percent       = 20
+  #     max_unavailable_percent = 0 # Zero downtime
+  #   }
+  # }
 }
