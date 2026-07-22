@@ -25,9 +25,14 @@ output "resource_computed_names" {
   value       = local.resource_computed_names
 }
 
-output "resource_type_token" {
+output "resource_computed_names" {
+  description = "Enterprise naming catalogue for GCP resources."
+  value       = local.resource_computed_names
+}
+
+output "iam_prefix" {
   description = "GCP resource naming abbreviations."
-  value       = local.resource_type_token
+  value       = local.resource_computed_names.iam_prefix
 }
 
 output "separators" {

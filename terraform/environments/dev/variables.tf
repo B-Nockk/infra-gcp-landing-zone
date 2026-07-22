@@ -1,4 +1,19 @@
 # terraform/modules/common/variables.tf
+# ============================== ==============================
+# BACKEND BUCKET CONFIGURATION
+# ============================== ==============================
+variable "backend_bucket" {
+  type = object({
+    provider             = string
+    prefix               = string
+    object_state_locking = bool
+  })
+}
+
+# ============================== ==============================
+# COMMON SHARED CONFIGURATION
+# ============================== ==============================
+
 variable "project_name" {
   description = "platform project name"
   type        = string
@@ -23,6 +38,9 @@ variable "project_id" {
   type        = string
 }
 
+# ============================== ==============================
+# SERVER & ENVIRONMENT CONFIGURATION
+# ============================== ==============================
 variable "environment" {
   description = "deployment environment"
 
@@ -99,11 +117,12 @@ variable "vpcs" {
 variable "compute" {
   description = "Map of compute fleets and their configurations."
   type = map(object({
-    machine_type       = string
-    vpc_key            = string # NEW: The logical name of the VPC (e.g., "primary")
-    subnet_key         = string # The logical name of the subnet (e.g., "private_subnet")
-    network_tags       = list(string)
-    assign_external_ip = bool
+    machine_type        = string
+    vpc_key             = string # NEW: The logical name of the VPC (e.g., "primary")
+    subnet_key          = string # The logical name of the subnet (e.g., "private_subnet")
+    network_tags        = list(string)
+    assign_external_ip  = bool
+    service_account_key = string # The logical key from the IAM module (e.g., "app-backend")
 
     boot_disk = object({
       image = string
@@ -116,5 +135,18 @@ variable "compute" {
       request_path = string
       protocol     = string
     })
+  }))
+}
+
+# ============================== ==============================
+# GCP COMPUTE CONFIGURATION
+# ============================== ==============================
+
+variable "workloads" {
+  description = "Map of workload identities and their GCP roles."
+  type = map(object({
+    display_name = string
+    description  = string
+    roles        = list(string)
   }))
 }

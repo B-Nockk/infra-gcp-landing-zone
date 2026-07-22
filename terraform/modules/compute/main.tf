@@ -52,6 +52,15 @@ resource "google_compute_instance_template" "this" {
     }
   }
 
+  service_account {
+    # Strict lookup: fails fast if the key doesn't exist in the IAM outputs
+    email = var.service_account_emails[each.value.service_account_key]
+
+    # "cloud-platform" allows the VM to talk to GCP APIs.
+    # The actual permissions are restricted by the IAM roles we assigned in the IAM module!
+    scopes = ["cloud-platform"]
+  }
+
   tags   = each.value.network_tags
   labels = var.common_tags
 

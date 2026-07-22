@@ -39,6 +39,18 @@ module "network" {
 # ============================== ==============================
 # 4. Compute Module (Templates, MIGs, Health Checks)
 # ============================== ==============================
+module "iam" {
+  source = "../../modules/iam"
+
+  project_id              = var.project_id
+  resource_computed_names = module.common.resource_computed_names
+
+  workloads = var.workloads
+}
+
+# ============================== ==============================
+# 4. Compute Module (Templates, MIGs, Health Checks)
+# ============================== ==============================
 module "compute" {
   source = "../../modules/compute"
 
@@ -46,7 +58,8 @@ module "compute" {
   region                  = var.gcp_region
   common_tags             = module.common.common_tags
   resource_computed_names = module.common.resource_computed_names
-  subnet_self_links       = module.network.subnet_self_links # WIRE-UP the network module's outputs directly into compute
+  subnet_self_links       = module.network.subnet_self_links  # WIRE-UP the network module's outputs directly into compute
+  service_account_emails  = module.iam.service_account_emails # THE WIRE-UP
   compute                 = var.compute
   # network_self_links    = module.network.subnet_self_links
 }

@@ -38,11 +38,12 @@ variable "subnet_self_links" {
 variable "compute" {
   description = "Map of compute fleets and their configurations."
   type = map(object({
-    machine_type       = string
-    vpc_key            = string # The logical name of the VPC (e.g., "primary")
-    subnet_key         = string # The logical name of the subnet (e.g., "private_subnet")
-    network_tags       = list(string)
-    assign_external_ip = bool
+    machine_type        = string
+    vpc_key             = string # The logical name of the VPC (e.g., "primary")
+    subnet_key          = string # The logical name of the subnet (e.g., "private_subnet")
+    network_tags        = list(string)
+    assign_external_ip  = bool
+    service_account_key = string # The logical key from the IAM module (e.g., "app-backend")
 
     boot_disk = object({
       image = string
@@ -56,4 +57,9 @@ variable "compute" {
       protocol     = string # "HTTP" or "HTTPS" or "TCP"
     })
   }))
+}
+
+variable "service_account_emails" {
+  description = "Map of SA keys to their emails (passed from IAM module)."
+  type        = map(string)
 }

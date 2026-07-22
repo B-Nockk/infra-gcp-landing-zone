@@ -69,5 +69,9 @@ locals {
       ])
     }
 
+    iam_prefix = join(local.sep.hyphen, [
+      local.resource_type_token.service_account,
+      local.resource_identifier
+    ])
   }
 }
