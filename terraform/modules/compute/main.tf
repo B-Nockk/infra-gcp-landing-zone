@@ -41,8 +41,10 @@ resource "google_compute_instance_template" "this" {
   }
 
   network_interface {
-    # Dynamically link to the correct subnet using the key from tfvars
-    subnetwork = var.subnet_self_links[each.value.subnet_key]
+    # THE FIX: Dynamically construct the flattened key using strict indexing.
+    # If vpc_key="primary" and subnet_key="private_subnet", this resolves to "primary-private_subnet".
+    # If it doesn't exist, Terraform fails fast. No silent fallbacks!
+    subnetwork = var.subnet_self_links["${each.value.vpc_key}-${each.value.subnet_key}"]
 
     dynamic "access_config" {
       for_each = each.value.assign_external_ip ? [1] : []

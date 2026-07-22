@@ -97,11 +97,12 @@ variable "vpcs" {
 # ============================== ==============================
 
 variable "compute" {
-  description = "Map of compute fleets (Instance Templates + MIGs) and their configurations."
+  description = "Map of compute fleets and their configurations."
   type = map(object({
     machine_type       = string
-    subnet_key         = string       # Must match the flattened output key from the network module (e.g., "primary-private_subnet")
-    network_tags       = list(string) # CRITICAL FIX: GCP Network Tags are lists, not maps!
+    vpc_key            = string # NEW: The logical name of the VPC (e.g., "primary")
+    subnet_key         = string # The logical name of the subnet (e.g., "private_subnet")
+    network_tags       = list(string)
     assign_external_ip = bool
 
     boot_disk = object({

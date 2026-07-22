@@ -35,11 +35,14 @@ variable "subnet_self_links" {
   type        = map(string)
 }
 
-# The actual compute configuration
 variable "compute" {
-  description = "Map of compute fleets (Instance Templates + MIGs)."
+  description = "Map of compute fleets and their configurations."
   type = map(object({
-    machine_type = string
+    machine_type       = string
+    vpc_key            = string # The logical name of the VPC (e.g., "primary")
+    subnet_key         = string # The logical name of the subnet (e.g., "private_subnet")
+    network_tags       = list(string)
+    assign_external_ip = bool
 
     boot_disk = object({
       image = string
@@ -47,16 +50,6 @@ variable "compute" {
       type  = string
     })
 
-    # The logical name of the subnet (e.g., "private_subnet")
-    subnet_key = string
-
-    # Network tags for firewall targeting
-    network_tags = list(string)
-
-    # External IP toggle
-    assign_external_ip = bool
-
-    # Health Check Configuration (Data-driven!)
     health_check = object({
       port         = number
       request_path = string # e.g., "/healthz"
