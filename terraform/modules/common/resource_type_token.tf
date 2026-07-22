@@ -34,6 +34,7 @@ locals {
     managed_instance_group = "mig"
     persistent_disk        = "pd"
     storage_bucket         = "bkt"
+    health_check           = "hc"
 
     # --- Databases & Data ---
     cloud_sql         = "sql"

@@ -50,7 +50,24 @@ locals {
           local.resource_type_token.route,
           local.resource_identifier
         ])
+
       }
     }
+
+    # COMPUTE NAMES (Root level, providing PREFIXES only)
+    compute = {
+      instance_template_prefix = join(local.sep.hyphen, [
+        local.resource_type_token.instance_template, local.resource_identifier
+      ])
+
+      instance_group_prefix = join(local.sep.hyphen, [
+        local.resource_type_token.managed_instance_group, local.resource_identifier
+      ])
+
+      health_check_prefix = join(local.sep.hyphen, [
+        local.resource_type_token.health_check, local.resource_identifier
+      ])
+    }
+
   }
 }
