@@ -4,17 +4,13 @@
 # Firewall Rules (VPC-Level)
 # ============================== ==============================
 resource "google_compute_firewall" "this" {
-  # We need a nested loop: for_each over VPCs, then over the firewalls inside them
-  for_each = merge([
-    for vpc_key, vpc_config in var.vpcs : {
-      for fw_key, fw_config in vpc_config.firewall_rules :
-      "${vpc_key}-${fw_key}" => merge(fw_config, { vpc_name = google_compute_network.this[vpc_key].name })
-    }
-  ]...)
+  for_each = local.flattened_firewalls
 
-  name    = "fw-${each.key}"
+  # Was hardcoded as "fw-${each.key}" — now pulls the token + identifier from
+  # common, same pattern the route resource below already used correctly.
+  name    = "${var.resource_computed_names.vpcs[each.value.vpc_key].firewall_prefix}-${each.value.fw_key}"
   project = var.project_id
-  network = each.value.vpc_name
+  network = google_compute_network.this[each.value.vpc_key].name
 
   priority  = each.value.priority
   direction = each.value.direction

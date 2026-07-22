@@ -18,23 +18,14 @@ output "vpc_names" {
 # ============================== ==============================
 output "subnet_ids" {
   description = "Map of subnet keys to their self_links (IDs). Used by Compute/GKE to attach VMs."
-  # We flatten the nested map (vpc -> subnet) into a single accessible map
-  value = merge([
-    for vpc_key, vpc_config in var.vpcs : {
-      for subnet_key, subnet_config in vpc_config.subnets :
-      "${vpc_key}-${subnet_key}" => google_compute_subnetwork.this["${vpc_key}-${subnet_key}"].id
-    }
-  ]...)
+  # The resource's own for_each keys already match "vpc_key-subnet_key" — no need
+  # to re-flatten var.vpcs a second time just to rebuild the same keys.
+  value = { for k, v in google_compute_subnetwork.this : k => v.id }
 }
 
 output "subnet_self_links" {
   description = "Map of subnet keys to their self_links."
-  value = merge([
-    for vpc_key, vpc_config in var.vpcs : {
-      for subnet_key, subnet_config in vpc_config.subnets :
-      "${vpc_key}-${subnet_key}" => google_compute_subnetwork.this["${vpc_key}-${subnet_key}"].self_link
-    }
-  ]...)
+  value       = { for k, v in google_compute_subnetwork.this : k => v.self_link }
 }
 
 # ============================== ==============================

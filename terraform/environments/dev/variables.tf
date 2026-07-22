@@ -1,14 +1,4 @@
 # terraform/modules/common/variables.tf
-# ============================== ==============================
-# BACKEND BUCKET CONFIGURATION
-# ============================== ==============================
-variable "backend_bucket" {
-  type = object({
-    provider             = string
-    prefix               = string
-    object_state_locking = bool
-  })
-}
 
 # ============================== ==============================
 # COMMON SHARED CONFIGURATION
@@ -27,11 +17,6 @@ variable "project_owner" {
   description = "platform owner"
   type        = string
 }
-
-# variable "project_owner_email" {
-#   description = "platform owner email"
-#   type        = string
-# }
 
 variable "project_id" {
   description = "project id"
@@ -102,7 +87,6 @@ variable "vpcs" {
   }))
 
   validation {
-    # This validates that EVERY VPC in the map has a valid routing mode
     condition = alltrue([
       for k, v in var.vpcs : contains(["GLOBAL", "REGIONAL"], v.routing_mode)
     ])
@@ -111,42 +95,38 @@ variable "vpcs" {
 }
 
 # ============================== ==============================
-# GCP COMPUTE CONFIGURATION
-# ============================== ==============================
-
-variable "compute" {
-  description = "Map of compute fleets and their configurations."
-  type = map(object({
-    machine_type        = string
-    vpc_key             = string # NEW: The logical name of the VPC (e.g., "primary")
-    subnet_key          = string # The logical name of the subnet (e.g., "private_subnet")
-    network_tags        = list(string)
-    assign_external_ip  = bool
-    service_account_key = string # The logical key from the IAM module (e.g., "app-backend")
-
-    boot_disk = object({
-      image = string
-      size  = number
-      type  = string
-    })
-
-    health_check = object({
-      port         = number
-      request_path = string
-      protocol     = string
-    })
-  }))
-}
-
-# ============================== ==============================
-# GCP COMPUTE CONFIGURATION
+# WORKLOADS — single source of truth: identity + IAM + (optional) compute
+# Replaces the old separate `workloads` + `compute` variables.
 # ============================== ==============================
 
 variable "workloads" {
-  description = "Map of workload identities and their GCP roles."
+  description = "Map of workloads: description, IAM roles, and an optional compute fleet definition."
   type = map(object({
-    display_name = string
-    description  = string
-    roles        = list(string)
+    description = string
+
+    iam = object({
+      roles = list(string)
+    })
+
+    # optional() so a future identity-only workload (no VM) doesn't need a compute block.
+    compute = optional(object({
+      machine_type       = string
+      vpc_key            = string # logical key into var.vpcs (e.g. "primary")
+      subnet_key         = string # logical key into that VPC's subnets (e.g. "private_subnet")
+      network_tags       = list(string)
+      assign_external_ip = bool
+
+      boot_disk = object({
+        image = string
+        size  = number
+        type  = string
+      })
+
+      health_check = object({
+        port         = number
+        request_path = string
+        protocol     = string
+      })
+    }))
   }))
 }

@@ -5,19 +5,42 @@ variable "project_id" {
   type        = string
 }
 
+# Narrowed to just what iam needs — common produces more, Terraform drops the rest.
 variable "resource_computed_names" {
-  description = "Naming catalogue."
+  description = "Naming catalogue (only the workload service-account names this module needs)."
   type = object({
     project_id = string
-    iam_prefix = string # We will add this to common module
+    workloads = map(object({
+      service_account = string
+    }))
   })
 }
 
 variable "workloads" {
-  description = "Map of workload identities (Service Accounts) and their required GCP roles."
+  description = "Single source of truth per-workload map (description, IAM roles, optional compute)."
   type = map(object({
-    display_name = string
-    description  = string
-    roles        = list(string) # e.g., ["roles/logging.logWriter", "roles/storage.objectViewer"]
+    description = string
+
+    iam = object({
+      roles = list(string)
+    })
+
+    compute = optional(object({
+      machine_type       = string
+      vpc_key            = string
+      subnet_key         = string
+      network_tags       = list(string)
+      assign_external_ip = bool
+      boot_disk = object({
+        image = string
+        size  = number
+        type  = string
+      })
+      health_check = object({
+        port         = number
+        request_path = string
+        protocol     = string
+      })
+    }))
   }))
 }

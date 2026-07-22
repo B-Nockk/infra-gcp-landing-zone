@@ -4,10 +4,9 @@
 # 1. Health Checks (Dynamic per instance)
 # ============================== ==============================
 resource "google_compute_health_check" "this" {
-  for_each = var.compute
+  for_each = local.compute_workloads
 
-  # Name: hc-lndzn-dev-euw1-01-app
-  name    = "${var.resource_computed_names.compute.health_check_prefix}-${each.key}"
+  name    = var.resource_computed_names.workloads[each.key].health_check
   project = var.project_id
 
   http_health_check {
@@ -25,10 +24,9 @@ resource "google_compute_health_check" "this" {
 # 2. Instance Templates (The Blueprints)
 # ============================== ==============================
 resource "google_compute_instance_template" "this" {
-  for_each = var.compute
+  for_each = local.compute_workloads
 
-  # Name Prefix: tmpl-lndzn-dev-euw1-01-app- (Terraform appends a random hash)
-  name_prefix  = "${var.resource_computed_names.compute.instance_template_prefix}-${each.key}-"
+  name_prefix  = "${var.resource_computed_names.workloads[each.key].instance_template}-"
   project      = var.project_id
   machine_type = each.value.machine_type
   region       = var.region
@@ -41,9 +39,8 @@ resource "google_compute_instance_template" "this" {
   }
 
   network_interface {
-    # THE FIX: Dynamically construct the flattened key using strict indexing.
-    # If vpc_key="primary" and subnet_key="private_subnet", this resolves to "primary-private_subnet".
-    # If it doesn't exist, Terraform fails fast. No silent fallbacks!
+    # Resolves to "primary-private_subnet" etc. If it doesn't exist, Terraform fails
+    # fast — no silent fallbacks.
     subnetwork = var.subnet_self_links["${each.value.vpc_key}-${each.value.subnet_key}"]
 
     dynamic "access_config" {
@@ -53,11 +50,7 @@ resource "google_compute_instance_template" "this" {
   }
 
   service_account {
-    # Strict lookup: fails fast if the key doesn't exist in the IAM outputs
-    email = var.service_account_emails[each.value.service_account_key]
-
-    # "cloud-platform" allows the VM to talk to GCP APIs.
-    # The actual permissions are restricted by the IAM roles we assigned in the IAM module!
+    email  = var.service_account_emails[each.key]
     scopes = ["cloud-platform"]
   }
 
@@ -73,10 +66,9 @@ resource "google_compute_instance_template" "this" {
 # 3. Managed Instance Groups (The Fleets)
 # ============================== ==============================
 resource "google_compute_region_instance_group_manager" "this" {
-  for_each = var.compute
+  for_each = local.compute_workloads
 
-  # Name: mig-lndzn-dev-euw1-01-app
-  name    = "${var.resource_computed_names.compute.instance_group_prefix}-${each.key}"
+  name    = var.resource_computed_names.workloads[each.key].instance_group
   project = var.project_id
   region  = var.region
 
@@ -84,10 +76,10 @@ resource "google_compute_region_instance_group_manager" "this" {
     instance_template = google_compute_instance_template.this[each.key].id
   }
 
-  target_size        = 2
-  base_instance_name = "vm-${each.key}"
+  target_size = 2
+  # Was hardcoded "vm-${each.key}" — now common's naming catalogue owns this too.
+  base_instance_name = var.resource_computed_names.workloads[each.key].instance_prefix
 
-  # Link the auto-healing to the specific health check we created for this instance!
   auto_healing_policies {
     health_check      = google_compute_health_check.this[each.key].id
     initial_delay_sec = 300 # Give the app 5 mins to boot before checking health
