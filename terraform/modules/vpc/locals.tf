@@ -1,7 +1,6 @@
 # terraform/modules/network/locals.tf
 
 locals {
-  vpc_name = var.resource_computed_names.vpcs.primary
   # 1. Flatten Subnets
   flattened_subnets = merge([
     for vpc_key, vpc_config in var.vpcs : {
@@ -30,7 +29,8 @@ locals {
     }
   ]...)
 
-  # 3. Flatten Firewalls (If you are keeping them in main.tf)
+  # 3. Flatten Firewalls — this local already existed but was unused; the firewall
+  # resource used to re-derive the same thing inline. Now it's actually used below.
   flattened_firewalls = merge([
     for vpc_key, vpc_config in var.vpcs : {
       for fw_key, fw_config in vpc_config.firewall_rules :

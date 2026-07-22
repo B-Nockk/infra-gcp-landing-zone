@@ -1,4 +1,9 @@
 # terraform/modules/common/variables.tf
+
+# ============================== ==============================
+# COMMON SHARED CONFIGURATION
+# ============================== ==============================
+
 variable "project_name" {
   description = "platform project name"
   type        = string
@@ -13,16 +18,14 @@ variable "project_owner" {
   type        = string
 }
 
-# variable "project_owner_email" {
-#   description = "platform owner email"
-#   type        = string
-# }
-
 variable "project_id" {
   description = "project id"
   type        = string
 }
 
+# ============================== ==============================
+# SERVER & ENVIRONMENT CONFIGURATION
+# ============================== ==============================
 variable "environment" {
   description = "deployment environment"
 
@@ -84,7 +87,6 @@ variable "vpcs" {
   }))
 
   validation {
-    # This validates that EVERY VPC in the map has a valid routing mode
     condition = alltrue([
       for k, v in var.vpcs : contains(["GLOBAL", "REGIONAL"], v.routing_mode)
     ])
@@ -93,28 +95,38 @@ variable "vpcs" {
 }
 
 # ============================== ==============================
-# GCP COMPUTE CONFIGURATION
+# WORKLOADS — single source of truth: identity + IAM + (optional) compute
+# Replaces the old separate `workloads` + `compute` variables.
 # ============================== ==============================
 
-variable "compute" {
-  description = "Map of compute fleets and their configurations."
+variable "workloads" {
+  description = "Map of workloads: description, IAM roles, and an optional compute fleet definition."
   type = map(object({
-    machine_type       = string
-    vpc_key            = string # NEW: The logical name of the VPC (e.g., "primary")
-    subnet_key         = string # The logical name of the subnet (e.g., "private_subnet")
-    network_tags       = list(string)
-    assign_external_ip = bool
+    description = string
 
-    boot_disk = object({
-      image = string
-      size  = number
-      type  = string
+    iam = object({
+      roles = list(string)
     })
 
-    health_check = object({
-      port         = number
-      request_path = string
-      protocol     = string
-    })
+    # optional() so a future identity-only workload (no VM) doesn't need a compute block.
+    compute = optional(object({
+      machine_type       = string
+      vpc_key            = string # logical key into var.vpcs (e.g. "primary")
+      subnet_key         = string # logical key into that VPC's subnets (e.g. "private_subnet")
+      network_tags       = list(string)
+      assign_external_ip = bool
+
+      boot_disk = object({
+        image = string
+        size  = number
+        type  = string
+      })
+
+      health_check = object({
+        port         = number
+        request_path = string
+        protocol     = string
+      })
+    }))
   }))
 }

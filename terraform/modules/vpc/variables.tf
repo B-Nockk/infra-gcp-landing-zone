@@ -11,23 +11,18 @@ variable "common_tags" {
 }
 
 # terraform/modules/vpc/variables.tf
-
+# Dynamic across any number of VPCs/subnets — matches common's output shape now
+# instead of hardcoding a single "primary" VPC with 3 fixed subnet keys.
 variable "resource_computed_names" {
   description = "Enterprise resource naming catalogue from the common module."
   type = object({
     project_id = string
-    vpcs = object({
-      primary = object({
-        name            = string
-        firewall_prefix = string
-        route_prefix    = string
-        subnets = object({
-          public_subnet     = string
-          private_subnet    = string
-          management_subnet = string
-        })
-      })
-    })
+    vpcs = map(object({
+      name            = string
+      firewall_prefix = string
+      route_prefix    = string
+      subnets         = map(string)
+    }))
   })
 }
 
@@ -66,7 +61,6 @@ variable "vpcs" {
   }))
 
   validation {
-    # This validates that EVERY VPC in the map has a valid routing mode
     condition = alltrue([
       for k, v in var.vpcs : contains(["GLOBAL", "REGIONAL"], v.routing_mode)
     ])
