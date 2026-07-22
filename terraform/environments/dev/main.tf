@@ -1,11 +1,16 @@
 # terraform/environments/dev/main.tf
 
-# 1. Fetch the pre-provisioned project details (Optional but good practice)
-# data "google_project" "this" {
-#   project_id = var.project_id
-# }
+# ============================== ==============================
+# 1. Provider Configuration
+# ============================== ==============================
+provider "google" {
+  project = var.project_id
+  region  = var.gcp_region
+}
 
-# 2. Call the common module to get names and tags
+# ============================== ==============================
+# 2. Common Module (The Single Source of Truth for Naming/Tags)
+# ============================== ==============================
 module "common" {
   source = "../../modules/common"
 
@@ -18,16 +23,30 @@ module "common" {
   instance_id   = var.instance_id
 }
 
-# 3. Call the network module
-module "vpc" {
-  source = "../../modules/vpc"
+# ============================== ==============================
+# 3. Network Module (VPCs, Subnets, Firewalls, Routes)
+# ============================== ==============================
+module "network" {
+  source = "../../modules/vpc" # (or vpc, depending on your folder name)
 
-  project_id = var.project_id
-  # region                  = var.gcp_region  <-- DELETE THIS LINE
-
+  project_id              = var.project_id
   common_tags             = module.common.common_tags
   resource_computed_names = module.common.resource_computed_names
 
-  # CHANGE THIS: network is now vpcs
   vpcs = var.vpcs
+}
+
+# ============================== ==============================
+# 4. Compute Module (Templates, MIGs, Health Checks)
+# ============================== ==============================
+module "compute" {
+  source = "../../modules/compute"
+
+  project_id              = var.project_id
+  region                  = var.gcp_region
+  common_tags             = module.common.common_tags
+  resource_computed_names = module.common.resource_computed_names
+  subnet_self_links       = module.network.subnet_self_links # WIRE-UP the network module's outputs directly into compute
+  compute                 = var.compute
+  # network_self_links    = module.network.subnet_self_links
 }

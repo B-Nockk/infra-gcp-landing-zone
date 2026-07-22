@@ -91,3 +91,29 @@ variable "vpcs" {
     error_message = "Every VPC must have a routing_mode of either 'GLOBAL' or 'REGIONAL'."
   }
 }
+
+# ============================== ==============================
+# GCP COMPUTE CONFIGURATION
+# ============================== ==============================
+
+variable "compute" {
+  description = "Map of compute fleets (Instance Templates + MIGs) and their configurations."
+  type = map(object({
+    machine_type       = string
+    subnet_key         = string       # Must match the flattened output key from the network module (e.g., "primary-private_subnet")
+    network_tags       = list(string) # CRITICAL FIX: GCP Network Tags are lists, not maps!
+    assign_external_ip = bool
+
+    boot_disk = object({
+      image = string
+      size  = number
+      type  = string
+    })
+
+    health_check = object({
+      port         = number
+      request_path = string
+      protocol     = string
+    })
+  }))
+}
