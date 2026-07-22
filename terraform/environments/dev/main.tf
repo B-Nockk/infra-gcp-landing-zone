@@ -65,5 +65,6 @@ module "compute" {
   resource_computed_names = module.common.resource_computed_names
   subnet_self_links       = module.network.subnet_self_links  # WIRE-UP the network module's outputs directly
   service_account_emails  = module.iam.service_account_emails # WIRE-UP the iam module's outputs directly
+  update_profiles         = var.update_profiles               # Pass the profiles library to the compute module
   workloads               = var.workloads
 }

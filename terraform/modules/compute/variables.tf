@@ -51,6 +51,7 @@ variable "workloads" {
 
     compute = optional(object({
       machine_type       = string
+      fleet_size         = number # We still need this for GCP math
       vpc_key            = string
       subnet_key         = string
       network_tags       = list(string)
@@ -67,6 +68,21 @@ variable "workloads" {
         request_path = string
         protocol     = string
       })
+
+      # Reference to update_profiles map key
+      update_profile = optional(string, "standard")
     }))
+  }))
+}
+
+variable "update_profiles" {
+  description = "Library of reusable update policy profiles."
+  type = map(object({
+    minimal_action          = string
+    type                    = string
+    max_surge_fixed         = optional(number)
+    max_unavailable_fixed   = optional(number)
+    max_surge_percent       = optional(number)
+    max_unavailable_percent = optional(number)
   }))
 }
