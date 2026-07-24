@@ -55,4 +55,11 @@ locals {
       "outputs.json"
     ])
   }
+
+  computed_state_bucket_name = join(local.sep.hyphen, [
+    var.state_bucket_prefix,
+    var.project_id
+  ])
+
+  final_state_bucket_name = var.override_computed_state_bucket_name != "" ? var.override_computed_state_bucket_name : local.computed_state_bucket_name
 }

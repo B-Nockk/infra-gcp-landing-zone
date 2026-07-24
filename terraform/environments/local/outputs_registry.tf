@@ -19,7 +19,7 @@ locals {
 resource "google_storage_bucket_object" "outputs_registry" {
   # Name is pulled directly from the common module's computed names
   name    = module.common.resource_computed_names.state_outputs_registry_path
-  bucket  = var.state_bucket_name
+  bucket  = module.common.state_bucket_name
   content = jsonencode(local.published_outputs)
 
   # Ensure this is created AFTER the resources it references

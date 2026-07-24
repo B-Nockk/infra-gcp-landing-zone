@@ -179,13 +179,18 @@ variable "update_profiles" {
 # ============================== ==============================
 
 variable "state_registry_prefix" {
-  description = "Prefix for the GCS bucket used to publish cross-repo outputs."
+  description = "The prefix inside the bucket used for the outputs registry."
   type        = string
-  default     = "outputs-registry"
 }
 
-variable "state_bucket_name" {
-  description = "The shared GCS bucket for both state and registry."
+variable "override_computed_state_bucket_name" {
+  description = "Optional override for the state bucket name. Leave empty to use the auto-computed name."
+  type        = string
+  default     = ""
+}
+
+variable "state_bucket_prefix" {
+  description = "The prefix used to compute the state bucket name (e.g., 'tfstate')."
   type        = string
 }
 

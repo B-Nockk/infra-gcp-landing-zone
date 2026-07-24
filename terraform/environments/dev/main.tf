@@ -14,14 +14,16 @@ provider "google" {
 module "common" {
   source = "../../modules/common"
 
-  project_id            = var.project_id
-  project_name          = var.project_name
-  project_token         = var.project_token
-  project_owner         = var.project_owner
-  environment           = var.environment
-  region_short          = var.region_short
-  instance_id           = var.instance_id
-  state_registry_prefix = var.state_registry_prefix # Pass from tfvars
+  project_id                          = var.project_id
+  project_name                        = var.project_name
+  project_token                       = var.project_token
+  project_owner                       = var.project_owner
+  environment                         = var.environment
+  region_short                        = var.region_short
+  instance_id                         = var.instance_id
+  state_registry_prefix               = var.state_registry_prefix # Pass from tfvars
+  state_bucket_prefix                 = var.state_bucket_prefix
+  override_computed_state_bucket_name = var.override_computed_state_bucket_name
 
   # Common only ever needs KEYS to generate names for — never the full schema.
   # This is the one and only place vpcs/workloads get "flattened" for common's benefit.

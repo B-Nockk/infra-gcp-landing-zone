@@ -62,3 +62,13 @@ variable "state_registry_prefix" {
   description = "The GCS prefix used for the cross-repo outputs registry."
   type        = string
 }
+
+variable "state_bucket_prefix" {
+  description = "The state bucket prefix used to construct the bucket name"
+  type        = string
+}
+
+variable "override_computed_state_bucket_name" {
+  type    = string
+  default = ""
+}
