@@ -4,8 +4,10 @@
 # 1. Provider Configuration
 # ============================== ==============================
 provider "google" {
-  project = var.project_id
-  region  = var.gcp_region
+  project               = var.project_id
+  region                = var.gcp_region
+  billing_project       = var.project_id
+  user_project_override = true
 }
 
 # ============================== ==============================
