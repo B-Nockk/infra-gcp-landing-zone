@@ -1,7 +1,7 @@
 # terraform/environments/dev/main.tf
 
 # ============================== ==============================
-# 1. Provider Configuration
+# Provider Configuration
 # ============================== ==============================
 provider "google" {
   project               = var.project_id
@@ -11,7 +11,7 @@ provider "google" {
 }
 
 # ============================== ==============================
-# 2. Common Module (The Single Source of Truth for Naming/Tags)
+# Common Module (The Single Source of Truth for Naming/Tags)
 # ============================== ==============================
 module "common" {
   source = "../../modules/common"
@@ -34,7 +34,17 @@ module "common" {
 }
 
 # ============================== ==============================
-# 3. Network Module (VPCs, Subnets, Firewalls, Routes)
+# Enable all required
+# ============================== ==============================
+module "project_services" {
+  source = "../../modules/project-services"
+
+  project_id    = var.project_id
+  required_apis = module.common.required_apis
+}
+
+# ============================== ==============================
+# Network Module (VPCs, Subnets, Firewalls, Routes)
 # ============================== ==============================
 module "network" {
   source = "../../modules/vpc"
@@ -47,7 +57,7 @@ module "network" {
 }
 
 # ============================== ==============================
-# 4. IAM Module (Service Accounts + Role Bindings)
+# IAM Module (Service Accounts + Role Bindings)
 # ============================== ==============================
 module "iam" {
   source = "../../modules/iam"
@@ -55,11 +65,12 @@ module "iam" {
   project_id              = var.project_id
   resource_computed_names = module.common.resource_computed_names
 
-  workloads = var.workloads
+  workloads  = var.workloads
+  depends_on = [module.project_services]
 }
 
 # ============================== ==============================
-# 5. Compute Module (Templates, MIGs, Health Checks)
+# Compute Module (Templates, MIGs, Health Checks)
 # ============================== ==============================
 module "compute" {
   source = "../../modules/compute"
@@ -72,10 +83,11 @@ module "compute" {
   service_account_emails  = module.iam.service_account_emails # WIRE-UP the iam module's outputs directly
   update_profiles         = var.update_profiles               # Pass the profiles library to the compute module
   workloads               = var.workloads
+  depends_on              = [module.project_services]
 }
 
 # ============================== ==============================
-# 6. Governance Module (Org Policies & Guardrails)
+# Governance Module (Org Policies & Guardrails)
 # ============================== ==============================
 module "governance" {
   source = "../../modules/governance"
@@ -83,4 +95,5 @@ module "governance" {
   project_id           = var.project_id
   org_policies         = var.org_policies
   vpc_service_controls = var.vpc_service_controls
+  depends_on           = [module.project_services]
 }

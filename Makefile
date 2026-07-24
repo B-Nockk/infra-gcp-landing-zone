@@ -60,11 +60,19 @@ init: bootstrap
 
 plan:
 	@echo "🗺️  Generating execution plan for $(ENV)..."
-	@cd $(ENV_DIR) && $(TF) plan -out=$(PLAN_FILE)
+	@cd $(ENV_DIR) && $(TF) plan -out=$(PLAN_FILE) $(ARGS)
 
+# SMART APPLY: If ARGS are provided (e.g., -target), skip the saved plan file.
+# Otherwise, use the safe, saved plan file workflow.
 apply:
 	@echo "🚀 Applying infrastructure plan for $(ENV)..."
-	@cd $(ENV_DIR) && $(TF) apply $(PLAN_FILE)
+	@if [ -n "$(ARGS)" ]; then \
+		echo "🚀 Applying with extra arguments for $(ENV) (skipping saved plan file due to Terraform limitations)..."; \
+		cd $(ENV_DIR) && $(TF) apply $(ARGS); \
+	else \
+		echo "🚀 Applying saved plan for $(ENV)..."; \
+		cd $(ENV_DIR) && $(TF) apply $(PLAN_FILE); \
+	fi
 
 # Publish outputs to the registry ONLY (Idempotent)
 publish-outputs:
