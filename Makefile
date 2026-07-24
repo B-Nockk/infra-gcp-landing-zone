@@ -56,7 +56,7 @@ bootstrap:
 	@bash $(SCRIPT_DIR)/bootstrap-state.sh $(ENV)
 
 init: bootstrap
-	@bash $(SCRIPT_DIR)/terraform-init.sh $(TF) $(ENV)
+	@bash $(SCRIPT_DIR)/terraform-init.sh $(TF) $(ENV) $(ARGS)
 
 plan:
 	@echo "🗺️  Generating execution plan for $(ENV)..."
