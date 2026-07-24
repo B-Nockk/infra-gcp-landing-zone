@@ -45,5 +45,14 @@ locals {
         health_check      = join(local.sep.hyphen, [local.resource_type_token.health_check, key, local.resource_identifier])
       }
     }
+
+    # Cross-Repo Registry Path
+    # Generates: "registry/dev/v1/outputs.json"
+    state_outputs_registry_path = join(local.sep.slash, [
+      var.state_registry_prefix,
+      var.environment,
+      "v1",
+      "outputs.json"
+    ])
   }
 }

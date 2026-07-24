@@ -57,3 +57,8 @@ variable "workload_keys" {
   type        = list(string)
   default     = []
 }
+
+variable "state_registry_prefix" {
+  description = "The GCS prefix used for the cross-repo outputs registry."
+  type        = string
+}

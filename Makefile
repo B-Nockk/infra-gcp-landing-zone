@@ -10,6 +10,10 @@
 TF ?= terraform
 ENV ?= dev
 
+# Data-driven targets and flags (No hardcoding in the rules)
+REGISTRY_TARGET ?= google_storage_bucket_object.outputs_registry
+AUTO_APPROVE_FLAG ?= -auto-approve
+
 ROOT_DIR := $(shell pwd)
 PLATFORM_DIR := $(ROOT_DIR)/platform_tooling
 SCRIPT_DIR := $(PLATFORM_DIR)/scripts
@@ -46,7 +50,7 @@ help:
 # ============================== ==============================
 # Targets
 # ============================== ==============================
-.PHONY: bootstrap init plan apply destroy fmt validate clean
+.PHONY: bootstrap init plan apply destroy publish-outputs deploy fmt validate clean
 
 bootstrap:
 	@bash $(SCRIPT_DIR)/bootstrap-state.sh $(ENV)
@@ -59,8 +63,17 @@ plan:
 	@cd $(ENV_DIR) && $(TF) plan -out=$(PLAN_FILE)
 
 apply:
-	@echo "🚀 Applying saved plan for $(ENV)..."
+	@echo "🚀 Applying infrastructure plan for $(ENV)..."
 	@cd $(ENV_DIR) && $(TF) apply $(PLAN_FILE)
+
+# Publish outputs to the registry ONLY (Idempotent)
+publish-outputs:
+	@echo "📤 Publishing outputs to registry for $(ENV)..."
+	@cd $(ENV_DIR) && $(TF) apply -target=$(REGISTRY_TARGET) $(AUTO_APPROVE_FLAG)
+
+# The combined command for local dev / manual full deployments
+deploy: apply publish-outputs
+	@echo "✅ Infrastructure applied and outputs published to registry."
 
 destroy:
 	@echo "💥 Destroying $(ENV)..."

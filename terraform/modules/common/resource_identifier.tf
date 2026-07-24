@@ -5,6 +5,7 @@ locals {
     hyphen     = "-"
     underscore = "_"
     dot        = "."
+    slash      = "/"
   }
 
   # Standard identifier for most resources (63-char limit)

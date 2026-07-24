@@ -172,3 +172,38 @@ variable "update_profiles" {
   #   }
   # }
 }
+
+
+# ============================== ==============================
+# REMOTE STATE REGISTRY
+# ============================== ==============================
+
+variable "state_registry_prefix" {
+  description = "Prefix for the GCS bucket used to publish cross-repo outputs."
+  type        = string
+  default     = "outputs-registry"
+}
+
+variable "state_bucket_name" {
+  description = "The shared GCS bucket for both state and registry."
+  type        = string
+}
+
+variable "org_policies" {
+  description = "Data-driven map of GCP Organization Policies to enforce."
+  type = map(object({
+    enforce = bool
+  }))
+  default = {}
+}
+
+variable "vpc_service_controls" {
+  description = "Optional VPC Service Controls configuration."
+  type = object({
+    org_id               = string
+    perimeter_name       = string
+    restricted_services  = list(string)
+    restricted_resources = list(string)
+  })
+  default = null
+}
