@@ -45,5 +45,21 @@ locals {
         health_check      = join(local.sep.hyphen, [local.resource_type_token.health_check, key, local.resource_identifier])
       }
     }
+
+    # Cross-Repo Registry Path
+    # Generates: "registry/dev/v1/outputs.json"
+    state_outputs_registry_path = join(local.sep.slash, [
+      var.state_registry_prefix,
+      var.environment,
+      "v1",
+      "outputs.json"
+    ])
   }
+
+  computed_state_bucket_name = join(local.sep.hyphen, [
+    var.state_bucket_prefix,
+    var.project_id
+  ])
+
+  final_state_bucket_name = var.override_computed_state_bucket_name != "" ? var.override_computed_state_bucket_name : local.computed_state_bucket_name
 }
