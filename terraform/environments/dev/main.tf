@@ -14,7 +14,7 @@ provider "google" {
 # Common Module (The Single Source of Truth for Naming/Tags)
 # ============================== ==============================
 module "common" {
-  source = "../../modules/common"
+  source = "git::https://github.com/B-Nockk/platform-gcp-terraform-library.git//modules/common"
 
   project_id                          = var.project_id
   project_name                        = var.project_name
@@ -37,7 +37,7 @@ module "common" {
 # Enable all required
 # ============================== ==============================
 module "project_services" {
-  source = "../../modules/project-services"
+  source = "git::https://github.com/B-Nockk/platform-gcp-terraform-library.git//modules/project-services"
 
   project_id    = var.project_id
   required_apis = module.common.required_apis
@@ -47,7 +47,7 @@ module "project_services" {
 # Network Module (VPCs, Subnets, Firewalls, Routes)
 # ============================== ==============================
 module "network" {
-  source = "../../modules/vpc"
+  source = "git::https://github.com/B-Nockk/platform-gcp-terraform-library.git//modules/vpc"
 
   project_id              = var.project_id
   common_tags             = module.common.common_tags
@@ -60,7 +60,7 @@ module "network" {
 # IAM Module (Service Accounts + Role Bindings)
 # ============================== ==============================
 module "iam" {
-  source = "../../modules/iam"
+  source = "git::https://github.com/B-Nockk/platform-gcp-terraform-library.git//modules/iam"
 
   project_id              = var.project_id
   resource_computed_names = module.common.resource_computed_names
@@ -73,7 +73,7 @@ module "iam" {
 # Compute Module (Templates, MIGs, Health Checks)
 # ============================== ==============================
 module "compute" {
-  source = "../../modules/compute"
+  source = "git::https://github.com/B-Nockk/platform-gcp-terraform-library.git//modules/compute"
 
   project_id              = var.project_id
   region                  = var.gcp_region
@@ -90,7 +90,7 @@ module "compute" {
 # Governance Module (Org Policies & Guardrails)
 # ============================== ==============================
 module "governance" {
-  source = "../../modules/governance"
+  source = "git::https://github.com/B-Nockk/platform-gcp-terraform-library.git//modules/governance"
 
   project_id           = var.project_id
   org_policies         = var.org_policies
